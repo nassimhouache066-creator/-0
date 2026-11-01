@@ -85,27 +85,35 @@
     <!-- 2. محتوى شاشة الهاتف الرئيسي (Single Screen Body) -->
     <main class="flex-1 p-3.5 flex flex-col justify-between gap-3 overflow-y-auto no-scrollbar bg-slate-900">
       
-      <!-- الصف الأول: الفوج التربوي + التاريخ + التوقيت -->
-      <div class="grid grid-cols-3 gap-2 bg-slate-800/80 p-2.5 rounded-xl border border-slate-700/60">
-        <div>
-          <label class="block text-[10px] font-bold text-slate-300 mb-1 flex items-center gap-1">
-            <i data-lucide="users" class="w-3 h-3 text-emerald-400"></i>الفوج
+      <!-- الصف الأول: الفوج التربوي + زر استرجاع أعمال الفوج + التاريخ + التوقيت -->
+      <div class="grid grid-cols-12 gap-2 bg-slate-800/80 p-2.5 rounded-xl border border-slate-700/60">
+        
+        <!-- حقل الفوج مع زر الاسترجاع السريع -->
+        <div class="col-span-5">
+          <label class="block text-[10px] font-bold text-slate-300 mb-1 flex items-center justify-between">
+            <span class="flex items-center gap-1"><i data-lucide="users" class="w-3 h-3 text-emerald-400"></i>الفوج</span>
+            <button onclick="retrieveGroupHistory()" class="text-[9px] text-emerald-400 font-bold hover:underline">استرجاع</button>
           </label>
-          <input type="text" id="groupInput" placeholder="مثال: 3م1" class="w-full bg-slate-900 text-white text-xs p-2 rounded-lg border border-slate-700 focus:outline-none focus:border-emerald-500 text-center font-bold">
+          <div class="flex gap-1">
+            <input type="text" id="groupInput" placeholder="مثال: 3م1" class="w-full bg-slate-900 text-white text-xs p-2 rounded-lg border border-slate-700 focus:outline-none focus:border-emerald-500 text-center font-bold">
+            <button onclick="retrieveGroupHistory()" title="عرض أعمال هذا الفوج" class="bg-emerald-700/80 hover:bg-emerald-600 text-white p-2 rounded-lg border border-emerald-500/40 flex items-center justify-center">
+              <i data-lucide="search" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
         </div>
 
-        <div>
+        <div class="col-span-4">
           <label class="block text-[10px] font-bold text-slate-300 mb-1 flex items-center gap-1">
             <i data-lucide="calendar" class="w-3 h-3 text-emerald-400"></i>التاريخ
           </label>
           <input type="date" id="dateInput" class="w-full bg-slate-900 text-white text-[10px] p-2 rounded-lg border border-slate-700 focus:outline-none focus:border-emerald-500 text-center">
         </div>
 
-        <div>
+        <div class="col-span-3">
           <label class="block text-[10px] font-bold text-slate-300 mb-1 flex items-center gap-1">
             <i data-lucide="clock" class="w-3 h-3 text-emerald-400"></i>التوقيت
           </label>
-          <input type="text" id="timingInput" placeholder="08:00 - 09:00" class="w-full bg-slate-900 text-white text-[10px] p-2 rounded-lg border border-slate-700 focus:outline-none focus:border-emerald-500 text-center font-medium">
+          <input type="text" id="timingInput" placeholder="08-09" class="w-full bg-slate-900 text-white text-[10px] p-2 rounded-lg border border-slate-700 focus:outline-none focus:border-emerald-500 text-center font-medium">
         </div>
       </div>
 
@@ -167,22 +175,33 @@
       </button>
     </footer>
 
-    <!-- النافذة المنبثقة: السجل والاسترجاع والطباعة -->
+    <!-- النافذة المنبثقة: السجل واستراد أعمال الفوج الواحد والطباعة -->
     <div id="historyModal" class="hidden absolute inset-0 bg-slate-950/95 z-50 flex flex-col p-4 backdrop-blur-sm">
       <div class="flex justify-between items-center pb-3 border-b border-slate-800">
         <h3 class="text-xs font-bold text-white flex items-center gap-1.5">
-          <i data-lucide="database" class="w-4 h-4 text-emerald-400"></i> سجل الكراس اليومي
+          <i data-lucide="database" class="w-4 h-4 text-emerald-400"></i> سجل الكراس واسترداد الفوج
         </h3>
         <button onclick="closeModal('historyModal')" class="text-slate-400 hover:text-white">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <div class="my-3 flex gap-2">
-        <input type="text" id="filterInput" oninput="filterRecords()" placeholder="تصفية بحسب الفوج..." class="flex-1 bg-slate-900 border border-slate-700 text-white text-xs p-2 rounded-lg">
-        <button onclick="triggerPrint()" class="bg-slate-800 hover:bg-slate-700 text-white text-xs px-3 py-2 rounded-lg flex items-center gap-1 border border-slate-700">
-          <i data-lucide="printer" class="w-3.5 h-3.5"></i>طباعة
-        </button>
+      <!-- أدوات تصفية واستراد الفوج الواحد -->
+      <div class="my-3 space-y-2">
+        <div class="flex gap-2">
+          <div class="relative flex-1">
+            <input type="text" id="filterInput" oninput="filterRecords()" placeholder="ادخل اسم الفوج لاسترجاع أعماله..." class="w-full bg-slate-900 border border-slate-700 text-white text-xs p-2.5 rounded-lg pr-8 focus:outline-none focus:border-emerald-500">
+            <i data-lucide="filter" class="w-3.5 h-3.5 text-slate-400 absolute top-3 right-2.5"></i>
+          </div>
+          <button onclick="triggerPrint()" class="bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg flex items-center gap-1 border border-emerald-500/40 font-semibold whitespace-nowrap">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i>طباعة الفوج
+          </button>
+        </div>
+
+        <!-- شريط سريع لأفواج الأستاذ المستخرجة تلقائياً -->
+        <div id="groupsQuickFilter" class="flex gap-1.5 overflow-x-auto no-scrollbar py-1">
+          <!-- يتم ملؤها بأزرار الأفواج تلقائياً -->
+        </div>
       </div>
 
       <div class="flex-1 overflow-y-auto space-y-2 no-scrollbar" id="recordsList">
@@ -215,7 +234,7 @@
             </button>
           </div>
           <p class="text-[10px] text-slate-400 leading-snug">
-            الصق هذا الكود في Google Apps Script على الشيت لتخزين كل خطط الحصص سحابياً.
+            الصق هذا الكود في Google Apps Script على الشيت لتخزين واسترجاع خطط الحصص سحابياً.
           </p>
         </div>
 
@@ -238,17 +257,17 @@
 
   </div>
 
-  <!-- 4. وثيقة الطباعة الرسمية لكراس اليومي للأستاذ -->
+  <!-- 4. وثيقة الطباعة الرسمية لكراس اليومي للأستاذ (مخصصة للفوج الواحد أو كافة الأفواج) -->
   <div id="printSection" class="hidden p-8 max-w-4xl mx-auto bg-white text-black font-sans">
     <div class="text-center border-b-2 border-slate-800 pb-4 mb-4">
       <h2 class="text-lg font-bold">الجمهورية الجزائرية الديمقراطية الشعبية</h2>
       <h3 class="text-base font-bold">وزارة التربية الوطنية</h3>
-      <h1 class="text-2xl font-black mt-2">الدفتر اليومي للأستاذ - خطة الأعمال الحالية والقادمة</h1>
+      <h1 class="text-2xl font-black mt-2" id="printTitle">الدفتر اليومي للأستاذ - سجل أعمال الفوج التربوي</h1>
     </div>
 
     <div class="mb-4 flex justify-between text-sm font-semibold">
       <span>تاريخ الاستخراج: <span id="printCurrentDate"></span></span>
-      <span>المؤسسة: ........................................</span>
+      <span>الفوج التربوي المحدد: <span id="printSelectedGroup" class="font-bold underline text-emerald-800">الكل</span></span>
     </div>
 
     <table class="w-full border-collapse border border-slate-800 text-right text-xs mb-8">
@@ -313,6 +332,18 @@
       }
     }
 
+    // استرجاع أعمال فوج محدد مباشرة من شاشة الإدخال
+    function retrieveGroupHistory() {
+      const g = document.getElementById("groupInput").value.trim();
+      if (!g) {
+        alert("يرجى كتابة اسم الفوج التربوي أولاً (مثال: 3م1) في خانة الفوج لاسترجاع أعماله.");
+        return;
+      }
+      openModal('historyModal');
+      document.getElementById("filterInput").value = g;
+      filterRecords();
+    }
+
     // تهيئة محرك الصوت والتسجيل
     function initSpeechEngine() {
       if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -359,7 +390,6 @@
 
       recognition.onend = function() {
         if (isSpeechActive) {
-          // إعادة التشغيل الآمن عند انقطاع الصوت المؤقت
           try { recognition.start(); } catch(e) { stopSpeech(); }
         } else {
           stopSpeech();
@@ -506,27 +536,55 @@
       lucide.createIcons();
     }
 
-    // النوافذ المنبثقة والسجل
+    // النوافذ المنبثقة والسجل مع أزرار تصفية الأقسام
     function openModal(id) {
       document.getElementById(id).classList.remove("hidden");
-      if (id === 'historyModal') renderRecords(records);
+      if (id === 'historyModal') {
+        renderQuickGroupFilters();
+        renderRecords(records);
+      }
     }
 
     function closeModal(id) {
       document.getElementById(id).classList.add("hidden");
     }
 
+    // بناء أزرار التصفية السريعة لكل فوج تربوي
+    function renderQuickGroupFilters() {
+      const container = document.getElementById("groupsQuickFilter");
+      const uniqueGroups = [...new Set(records.map(r => r.group).filter(Boolean))];
+
+      if (!uniqueGroups.length) {
+        container.innerHTML = "";
+        return;
+      }
+
+      let html = `<button onclick="setFilter('')" class="bg-emerald-600 text-white text-[10px] px-2.5 py-1 rounded-full font-bold whitespace-nowrap">عرض الكل</button>`;
+      html += uniqueGroups.map(g => `
+        <button onclick="setFilter('${g}')" class="bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-700 text-[10px] px-2.5 py-1 rounded-full font-bold whitespace-nowrap">
+          ${g}
+        </button>
+      `).join("");
+
+      container.innerHTML = html;
+    }
+
+    function setFilter(groupName) {
+      document.getElementById("filterInput").value = groupName;
+      filterRecords();
+    }
+
     function renderRecords(data) {
       const container = document.getElementById("recordsList");
       if (!data.length) {
-        container.innerHTML = `<div class="text-center text-slate-500 py-8 text-xs">لا توجد سجلات بعد.</div>`;
+        container.innerHTML = `<div class="text-center text-slate-500 py-8 text-xs">لا توجد سجلات مطابقة لهذا الفوج.</div>`;
         return;
       }
 
       container.innerHTML = data.map(r => `
         <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl space-y-1 text-xs">
           <div class="flex justify-between items-center text-[10px] text-emerald-400 font-bold border-b border-slate-800 pb-1">
-            <span>الفوج: ${r.group}</span>
+            <span class="bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800/40">الفوج: ${r.group}</span>
             <span>${r.date} (${r.timing || 'غير محدد'})</span>
           </div>
           <p class="text-slate-200 leading-relaxed font-medium pt-1">${r.plannedWork}</p>
@@ -536,7 +594,7 @@
     }
 
     function filterRecords() {
-      const q = document.getElementById("filterInput").value.toLowerCase();
+      const q = document.getElementById("filterInput").value.toLowerCase().trim();
       const filtered = records.filter(r => r.group.toLowerCase().includes(q) || r.plannedWork.toLowerCase().includes(q));
       renderRecords(filtered);
     }
@@ -568,9 +626,14 @@
     }
 
     function triggerPrint() {
+      const selectedGroup = document.getElementById("filterInput").value.trim();
       document.getElementById("printCurrentDate").textContent = new Date().toLocaleDateString("ar-DZ");
+      document.getElementById("printSelectedGroup").textContent = selectedGroup ? selectedGroup : "كافة الأفواج";
+
+      const targetRecords = selectedGroup ? records.filter(r => r.group.toLowerCase().includes(selectedGroup.toLowerCase())) : records;
+
       const tbody = document.getElementById("printTableBody");
-      tbody.innerHTML = records.map(r => `
+      tbody.innerHTML = targetRecords.map(r => `
         <tr>
           <td class="border border-slate-800 p-2 text-center">${r.date}</td>
           <td class="border border-slate-800 p-2 font-bold text-center">${r.group}</td>
