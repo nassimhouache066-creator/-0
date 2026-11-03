@@ -4,642 +4,490 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>الكراس اليومي الرقمي للأستاذ</title>
-
-  <!-- Tailwind CSS CDN -->
+  
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- Google Font: Cairo -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-
   <style>
-    * {
-      font-family: 'Cairo', sans-serif;
-      touch-action: manipulation;
-      box-sizing: border-box;
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
     
-    body {
-      background-color: #0f172a;
-      height: 100vh;
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+    * {
+      font-family: 'Tajawal', sans-serif;
+      touch-action: manipulation;
     }
 
-    /* تأثيرات الميكروفون عند التسجيل */
-    @keyframes pulse-ring {
-      0% { transform: scale(0.95); opacity: 0.8; }
-      50% { transform: scale(1.1); opacity: 0.4; }
-      100% { transform: scale(0.95); opacity: 0.8; }
-    }
-    .recording-pulse {
-      animation: pulse-ring 1.5s infinite ease-in-out;
-    }
-
-    /* إخفاء شريط التمرير */
+    /* اخفاء شريط التمرير لمعاينة شاشة واحدة */
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    /* أنماط خاصة بالطباعة الرسمية */
     @media print {
-      body { background: white !important; overflow: visible !important; height: auto !important; }
-      #appContainer { display: none !important; }
-      #printSection { display: block !important; }
+      body * { visibility: hidden; }
+      #printableArea, #printableArea * { visibility: visible; }
+      #printableArea { position: absolute; left: 0; top: 0; width: 100%; }
+      .no-print { display: none !important; }
     }
   </style>
 </head>
-<body class="p-0 sm:p-2">
 
-  <!-- غلاف إطار الهاتف (Mobile Viewport Frame) -->
-  <div id="appContainer" class="w-full max-w-md h-full sm:h-[95vh] bg-slate-900 sm:rounded-3xl shadow-2xl flex flex-col justify-between overflow-hidden relative border border-slate-800">
+<body class="bg-slate-100 text-slate-800 flex flex-col h-screen overflow-hidden select-none">
 
-    <!-- 1. الشريط العلوي ثابت (Header Bar) -->
-    <header class="bg-gradient-to-r from-emerald-800 to-teal-900 text-white p-3.5 px-4 flex justify-between items-center shadow-md border-b border-emerald-700/40">
-      <div class="flex items-center gap-2">
-        <div class="w-8 h-8 rounded-full bg-emerald-600/50 flex items-center justify-center border border-emerald-400/30">
-          <i data-lucide="notebook-pen" class="w-4 h-4 text-emerald-200"></i>
-        </div>
-        <div>
-          <h1 class="text-xs font-bold leading-tight">الكراس اليومي الرقمي</h1>
-          <p class="text-[10px] text-emerald-200 opacity-90">تدوين خطة الحصة القادمة بالصوت</p>
-        </div>
+  <!-- Header / الشريط العلوي -->
+  <header class="bg-slate-900 text-white p-2.5 shrink-0 shadow-md flex justify-between items-center z-10">
+    <div class="flex items-center gap-2">
+      <div class="bg-blue-600 p-1.5 rounded-lg flex items-center justify-center">
+        <i data-lucide="book-open" class="w-5 h-5 text-white"></i>
       </div>
-
-      <div class="flex items-center gap-1.5">
-        <!-- زر الحفظ أيقونة في الشريط العلوي -->
-        <button onclick="saveEntry()" id="saveBtn" title="حفظ وتدوين الخطة" class="p-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white flex items-center gap-1 text-[11px] font-bold border border-emerald-400/40 shadow-sm transition">
-          <i data-lucide="save" class="w-4 h-4"></i>
-          <span>حفظ</span>
-        </button>
-
-        <button onclick="openModal('historyModal')" class="p-1.5 rounded-lg bg-emerald-700/60 hover:bg-emerald-600 text-emerald-100 flex items-center gap-1 text-[11px] font-semibold border border-emerald-500/30">
-          <i data-lucide="history" class="w-3.5 h-3.5"></i>
-          <span>السجل</span>
-        </button>
-        <button onclick="openModal('settingsModal')" class="p-1.5 rounded-lg bg-emerald-700/60 hover:bg-emerald-600 text-emerald-100 border border-emerald-500/30">
-          <i data-lucide="settings" class="w-4 h-4"></i>
-        </button>
+      <div>
+        <h1 class="text-sm font-bold leading-tight">الكراس اليومي الرقمي</h1>
+        <p class="text-[10px] text-slate-400">الأستاذ حواش زكرياء</p>
       </div>
-    </header>
+    </div>
+    
+    <div class="flex items-center gap-1.5">
+      <button onclick="openSettings()" class="p-1.5 text-slate-300 hover:text-white rounded-lg hover:bg-slate-800 transition">
+        <i data-lucide="settings" class="w-5 h-5"></i>
+      </button>
+      <button onclick="openLogModal()" class="p-1.5 text-slate-300 hover:text-white rounded-lg hover:bg-slate-800 transition relative">
+        <i data-lucide="history" class="w-5 h-5"></i>
+        <span id="logBadge" class="absolute -top-1 -right-1 bg-blue-500 text-white text-[9px] font-bold px-1 rounded-full hidden">0</span>
+      </button>
+    </div>
+  </header>
 
-    <!-- 2. محتوى شاشة الهاتف الرئيسي (Single Screen Body) -->
-    <main class="flex-1 p-2 flex flex-col justify-between gap-1.5 overflow-hidden bg-slate-900">
+  <!-- Main Viewport / واجهة التدوين المباشرة (شاشة واحدة بدون تمرير) -->
+  <main class="flex-1 flex flex-col justify-between p-2.5 gap-2 overflow-hidden">
+    
+    <!-- بيانات الحصة (التاريخ، الفوج، التوقيت) -->
+    <div class="bg-white p-2.5 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-2 shrink-0">
       
-      <!-- الصف الأول: الفوج التربوي + زر استرجاع أعمال الفوج + التاريخ + التوقيت -->
-      <div class="grid grid-cols-12 gap-1.5 bg-slate-800/80 p-2 rounded-xl border border-slate-700/60">
-        
-        <!-- حقل الفوج مع زر الاسترجاع السريع -->
-        <div class="col-span-5">
-          <label class="block text-[10px] font-bold text-slate-300 mb-0.5 flex items-center justify-between">
-            <span class="flex items-center gap-1"><i data-lucide="users" class="w-3 h-3 text-emerald-400"></i>الفوج</span>
-            <button onclick="retrieveGroupHistory()" class="text-[9px] text-emerald-400 font-bold hover:underline">استرجاع</button>
-          </label>
-          <div class="flex gap-1">
-            <input type="text" id="groupInput" placeholder="مثال: 3م1" class="w-full bg-slate-900 text-white text-xs p-1.5 rounded-lg border border-slate-700 focus:outline-none focus:border-emerald-500 text-center font-bold">
-            <button onclick="retrieveGroupHistory()" title="عرض أعمال هذا الفوج" class="bg-emerald-700/80 hover:bg-emerald-600 text-white p-1.5 rounded-lg border border-emerald-500/40 flex items-center justify-center">
-              <i data-lucide="search" class="w-3.5 h-3.5"></i>
-            </button>
-          </div>
-        </div>
-
-        <div class="col-span-4">
-          <label class="block text-[10px] font-bold text-slate-300 mb-0.5 flex items-center gap-1">
-            <i data-lucide="calendar" class="w-3 h-3 text-emerald-400"></i>التاريخ
-          </label>
-          <input type="date" id="dateInput" class="w-full bg-slate-900 text-white text-[10px] p-1.5 rounded-lg border border-slate-700 focus:outline-none focus:border-emerald-500 text-center">
-        </div>
-
-        <div class="col-span-3">
-          <label class="block text-[10px] font-bold text-slate-300 mb-0.5 flex items-center gap-1">
-            <i data-lucide="clock" class="w-3 h-3 text-emerald-400"></i>التوقيت
-          </label>
-          <input type="text" id="timingInput" placeholder="08-09" class="w-full bg-slate-900 text-white text-[10px] p-1.5 rounded-lg border border-slate-700 focus:outline-none focus:border-emerald-500 text-center font-medium">
-        </div>
-      </div>
-
-      <!-- الصف الرئيسي: خانة التدوين الصوتي لخطة الحصة القادمة -->
-      <div class="flex-1 flex flex-col bg-slate-800/80 p-2 rounded-xl border border-slate-700/60 relative min-h-0">
-        <div class="flex items-center justify-between mb-1">
-          <label class="text-[11px] font-bold text-emerald-400 flex items-center gap-1">
-            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-400"></i>
-            العمل المزمع إنجازه في الحصة القادمة
-          </label>
-          <span id="speechStatus" class="text-[9px] px-2 py-0.5 rounded-full bg-slate-700 text-slate-300 font-semibold">جاهز</span>
-        </div>
-
-        <!-- حقل النص والتسجيل -->
-        <div class="flex-1 min-h-[55px] relative flex flex-col">
-          <textarea id="plannedWorkInput" placeholder="اضغط زر الميكروفون وتحدث بصوت واضح لتدوين الخطة..." class="w-full h-full min-h-[50px] bg-slate-900 text-slate-100 text-xs p-2 rounded-lg border border-slate-700 focus:outline-none focus:border-emerald-500 resize-none leading-relaxed"></textarea>
-          
-          <!-- مؤشر الصوت المباشر المعاين -->
-          <div id="livePreview" class="text-[9px] text-emerald-300 italic min-h-[12px] px-1"></div>
-        </div>
-
-        <!-- أزرار الإملاء الصوتي ومؤشر مستوى الصوت -->
-        <div class="mt-1 flex items-center justify-between bg-slate-900/90 p-1 rounded-lg border border-slate-700/80">
-          
-          <!-- زر التسجيل الصوتي الدائري -->
-          <button id="recordBtn" onclick="toggleSpeech()" class="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold px-2.5 py-1 rounded-md text-[11px] transition shadow-md">
-            <div id="micRing" class="w-2.5 h-2.5 rounded-full bg-white flex items-center justify-center">
-              <i data-lucide="mic" class="w-2 h-2 text-emerald-700"></i>
-            </div>
-            <span id="recordBtnText">بدء الإملاء الصوتي</span>
-          </button>
-
-          <!-- شريط مستشعر الصوت -->
-          <div class="flex items-center gap-1 px-1.5">
-            <div id="vu1" class="w-1 h-2.5 bg-slate-700 rounded-full transition-all duration-75"></div>
-            <div id="vu2" class="w-1 h-3.5 bg-slate-700 rounded-full transition-all duration-75"></div>
-            <div id="vu3" class="w-1 h-4 bg-slate-700 rounded-full transition-all duration-75"></div>
-            <div id="vu4" class="w-1 h-3.5 bg-slate-700 rounded-full transition-all duration-75"></div>
-            <div id="vu5" class="w-1 h-2.5 bg-slate-700 rounded-full transition-all duration-75"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- حقل ملاحظات خفيف -->
-      <div class="bg-slate-800/80 p-1.5 rounded-xl border border-slate-700/60">
-        <label class="block text-[9px] font-bold text-slate-400 mb-0.5 flex items-center gap-1">
-          <i data-lucide="sticky-note" class="w-2.5 h-2.5 text-slate-400"></i>ملاحظات إضافية (اختياري)
-        </label>
-        <input type="text" id="notesInput" placeholder="تجهيز وسائل تجريبية، إحضار وثائق..." class="w-full bg-slate-900 text-slate-200 text-xs p-1.5 rounded-lg border border-slate-700 focus:outline-none focus:border-emerald-500">
-      </div>
-
-    </main>
-
-    <!-- النافذة المنبثقة: السجل واستراد أعمال الفوج الواحد والطباعة -->
-    <div id="historyModal" class="hidden absolute inset-0 bg-slate-950/95 z-50 flex flex-col p-4 backdrop-blur-sm">
-      <div class="flex justify-between items-center pb-3 border-b border-slate-800">
-        <h3 class="text-xs font-bold text-white flex items-center gap-1.5">
-          <i data-lucide="database" class="w-4 h-4 text-emerald-400"></i> سجل الكراس واسترداد الفوج
-        </h3>
-        <button onclick="closeModal('historyModal')" class="text-slate-400 hover:text-white">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <!-- أدوات تصفية واستراد الفوج الواحد -->
-      <div class="my-3 space-y-2">
-        <div class="flex gap-2">
-          <div class="relative flex-1">
-            <input type="text" id="filterInput" oninput="filterRecords()" placeholder="ادخل اسم الفوج لاسترجاع أعماله..." class="w-full bg-slate-900 border border-slate-700 text-white text-xs p-2.5 rounded-lg pr-8 focus:outline-none focus:border-emerald-500">
-            <i data-lucide="filter" class="w-3.5 h-3.5 text-slate-400 absolute top-3 right-2.5"></i>
-          </div>
-          <button onclick="triggerPrint()" class="bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg flex items-center gap-1 border border-emerald-500/40 font-semibold whitespace-nowrap">
-            <i data-lucide="printer" class="w-3.5 h-3.5"></i>طباعة الفوج
-          </button>
-        </div>
-
-        <!-- شريط سريع لأفواج الأستاذ المستخرجة تلقائياً -->
-        <div id="groupsQuickFilter" class="flex gap-1.5 overflow-x-auto no-scrollbar py-1">
-          <!-- يتم ملؤها بأزرار الأفواج تلقائياً -->
-        </div>
-      </div>
-
-      <div class="flex-1 overflow-y-auto space-y-2 no-scrollbar" id="recordsList">
-        <!-- يتم ملؤها ديناميكياً -->
-      </div>
-    </div>
-
-    <!-- النافذة المنبثقة: إعدادات Google Sheets والدليل -->
-    <div id="settingsModal" class="hidden absolute inset-0 bg-slate-950/95 z-50 flex flex-col p-4 backdrop-blur-sm overflow-y-auto no-scrollbar">
-      <div class="flex justify-between items-center pb-3 border-b border-slate-800">
-        <h3 class="text-xs font-bold text-white flex items-center gap-1.5">
-          <i data-lucide="settings" class="w-4 h-4 text-emerald-400"></i> إعدادات الربط مع الشيت
-        </h3>
-        <button onclick="closeModal('settingsModal')" class="text-slate-400 hover:text-white">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <div class="py-3 space-y-3">
+      <!-- التاريخ والتوقيت -->
+      <div class="grid grid-cols-2 gap-2">
         <div>
-          <label class="block text-[11px] font-bold text-slate-300 mb-1">رابط Google Apps Script (Web App URL)</label>
-          <input type="url" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-slate-900 text-white text-xs p-2.5 rounded-lg border border-slate-700 focus:outline-none focus:border-emerald-500 dir-ltr">
+          <label class="text-[11px] font-bold text-slate-500 mb-0.5 block">التاريخ</label>
+          <input type="date" id="sessionDate" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-1.5 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none">
         </div>
-
-        <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 space-y-2 text-xs">
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-slate-300 text-[11px]">كود Apps Script المعتمد:</span>
-            <button onclick="copyAppsScriptCode()" class="text-emerald-400 font-bold bg-slate-800 border border-slate-700 px-2 py-0.5 rounded text-[10px]">
-              <span id="copyBtnText">نسخ الكود</span>
-            </button>
-          </div>
-          <p class="text-[10px] text-slate-400 leading-snug">
-            الصق هذا الكود في Google Apps Script على الشيت لتخزين واسترجاع خطط الحصص سحابياً.
-          </p>
+        <div>
+          <label class="text-[11px] font-bold text-slate-500 mb-0.5 block">التوقيت الزمن</label>
+          <select id="sessionTiming" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-1.5 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none">
+            <option value="08:00 - 09:00">08:00 - 09:00</option>
+            <option value="09:00 - 10:00">09:00 - 10:00</option>
+            <option value="10:00 - 11:00">10:00 - 11:00</option>
+            <option value="11:00 - 12:00">11:00 - 12:00</option>
+            <option value="13:30 - 14:30">13:30 - 14:30</option>
+            <option value="14:30 - 15:30">14:30 - 15:30</option>
+            <option value="15:30 - 16:30">15:30 - 16:30</option>
+          </select>
         </div>
+      </div>
 
-        <!-- دليل الخطوات -->
-        <div class="bg-emerald-950/50 border border-emerald-800/60 rounded-xl p-3 space-y-2 text-xs">
-          <h4 class="font-bold text-emerald-300 text-[11px] flex items-center gap-1">
-            <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> خطوتان سريعتان للربط:
-          </h4>
-          <ol class="list-decimal list-inside space-y-1 text-[10px] text-emerald-100 font-medium">
-            <li>أنشئ جدول بيانات جديد في <a href="https://sheets.google.com" target="_blank" class="underline text-emerald-300">Google Sheets</a>.</li>
-            <li>من الإضافات ➔ Apps Script الصق الكود وانشره كـ <b>Web App</b> وانسخ الرابط وضعه هنا!</li>
-          </ol>
+      <!-- الفوج التربوي وتصفية السجل المباشرة -->
+      <div class="flex items-center gap-1.5">
+        <div class="flex-1">
+          <label class="text-[11px] font-bold text-slate-500 mb-0.5 block">الفوج التربوي</label>
+          <select id="sessionGroup" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-1.5 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none">
+            <option value="2 م 1">2 متوسط 1</option>
+            <option value="2 م 2">2 متوسط 2</option>
+            <option value="4 م 1">4 متوسط 1</option>
+            <option value="4 م 2">4 متوسط 2</option>
+          </select>
         </div>
-
-        <button onclick="saveSettings()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs">
-          حفظ الإعدادات
+        <button onclick="filterRecordsByCurrentGroup()" title="تصفية واسترجاع سجل هذا الفوج" class="self-end p-2 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 rounded-lg text-xs font-bold flex items-center gap-1 transition">
+          <i data-lucide="filter" class="w-4 h-4 text-blue-600"></i>
+          <span>سجل الفوج</span>
         </button>
       </div>
+
     </div>
 
+    <!-- العمل المزمز إنجازه بالحصة القادمة (مربع الإدخال الرئيسي) -->
+    <div class="flex-1 bg-white p-2.5 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between overflow-hidden">
+      
+      <div class="flex justify-between items-center mb-1">
+        <span class="text-xs font-bold text-slate-700 flex items-center gap-1">
+          <i data-lucide="pen-tool" class="w-3.5 h-3.5 text-blue-600"></i>
+          العمل المزمع إنجازه في الحصة القادمة
+        </span>
+        
+        <!-- زر الميكروفون للتعرف الصوتي -->
+        <button id="micBtn" onclick="toggleVoiceInput()" class="px-2.5 py-1 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 rounded-full text-[11px] font-bold flex items-center gap-1 transition">
+          <i data-lucide="mic" class="w-3.5 h-3.5"></i>
+          <span id="micText">إملاء صوتي</span>
+        </button>
+      </div>
+
+      <!-- محرر النص المباشر -->
+      <textarea id="plannedWork" class="w-full flex-1 bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none resize-none no-scrollbar" placeholder="اكتب أو أملِ صوتياً العمل المزمع إنجازه (مثال: دراسة التحليل الكهربائي للماء، حل التمرين 4 ص 30...)"></textarea>
+
+      <!-- شريط الاختصارات السريعة للتدوين بضغطة زر -->
+      <div class="flex items-center gap-1 overflow-x-auto no-scrollbar pt-1.5 border-t border-slate-100">
+        <span class="text-[10px] text-slate-400 shrink-0">إدخال سريع:</span>
+        <button onclick="appendQuickText('تقويم تشخيصي للترابط العصبي.')" class="bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-600 px-2 py-0.5 rounded text-[10px] shrink-0 border border-slate-200">تقويم تشخيصي</button>
+        <button onclick="appendQuickText('إنجاز الوضعية التعلمية الاستكشافية.')" class="bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-600 px-2 py-0.5 rounded text-[10px] shrink-0 border border-slate-200">وضعية تعلمية</button>
+        <button onclick="appendQuickText('حل التمارين المحضرة على الكراس.')" class="bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-600 px-2 py-0.5 rounded text-[10px] shrink-0 border border-slate-200">حل تمارين</button>
+        <button onclick="appendQuickText('حصة معالجة بيداغوجية.')" class="bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-600 px-2 py-0.5 rounded text-[10px] shrink-0 border border-slate-200">معالجة بيداغوجية</button>
+      </div>
+
+    </div>
+
+    <!-- ملاحظات سريعة (اختياري) -->
+    <div class="bg-white p-2 rounded-xl shadow-sm border border-slate-200 shrink-0">
+      <input type="text" id="sessionNotes" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="ملاحظات الحصة (غياب، تأخر، استدعاء ولي...)">
+    </div>
+
+    <!-- زر الحفظ المباشر (بارز وثابت في الأسفل) -->
+    <button onclick="saveRecord()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl shadow-md flex justify-center items-center gap-2 text-xs active:scale-[0.99] transition shrink-0">
+      <i data-lucide="save" class="w-4 h-4"></i>
+      <span>حفظ وتدوين الخطة في الكراس والشيت</span>
+    </button>
+
+  </main>
+
+  <!-- النافذة المنبثقة: السجل والطباعة المخصصة لجميع الأفواج أو الفوج المحدد -->
+  <div id="logModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-center items-end sm:items-center hidden">
+    <div class="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl h-[85vh] flex flex-col overflow-hidden shadow-2xl">
+      
+      <div class="bg-slate-900 text-white p-3 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+          <i data-lucide="file-text" class="w-5 h-5 text-blue-400"></i>
+          <h2 class="text-sm font-bold">سجل الكراس اليومي والطباعة</h2>
+        </div>
+        <button onclick="closeLogModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- أدوات الفلترة في السجل -->
+      <div class="p-2.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-2">
+        <select id="modalGroupFilter" onchange="renderLogs()" class="bg-white border border-slate-300 rounded-lg p-1.5 text-xs font-bold text-slate-700 outline-none">
+          <option value="ALL">جميع الأفواج التربوية</option>
+          <option value="2 م 1">2 متوسط 1</option>
+          <option value="2 م 2">2 متوسط 2</option>
+          <option value="4 م 1">4 متوسط 1</option>
+          <option value="4 م 2">4 متوسط 2</option>
+        </select>
+
+        <button onclick="printLogbook()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm transition">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+          <span>طباعة الوثيقة الرسمية</span>
+        </button>
+      </div>
+
+      <!-- قائمة السجلات -->
+      <div id="logList" class="flex-1 p-3 overflow-y-auto space-y-2 no-scrollbar">
+        <!-- يتم ملؤه تلقائياً بالسكربت -->
+      </div>
+
+    </div>
   </div>
 
-  <!-- 4. وثيقة الطباعة الرسمية لكراس اليومي للأستاذ (مخصصة للفوج الواحد أو كافة الأفواج) -->
-  <div id="printSection" class="hidden p-8 max-w-4xl mx-auto bg-white text-black font-sans">
-    <div class="text-center border-b-2 border-slate-800 pb-4 mb-4">
-      <h2 class="text-lg font-bold">الجمهورية الجزائرية الديمقراطية الشعبية</h2>
-      <h3 class="text-base font-bold">وزارة التربية الوطنية</h3>
-      <h1 class="text-2xl font-black mt-2" id="printTitle">الدفتر اليومي للأستاذ - سجل أعمال الفوج التربوي</h1>
-    </div>
+  <!-- النافذة المنبثقة: الإعدادات وربط Google Apps Script -->
+  <div id="settingsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-center items-center p-4 hidden">
+    <div class="bg-white w-full max-w-md rounded-2xl p-4 shadow-2xl flex flex-col gap-3">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h3 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+          <i data-lucide="database" class="w-4 h-4 text-blue-600"></i>
+          إعدادات الربط بقاعدة البيانات (Google Sheets)
+        </h3>
+        <button onclick="closeSettings()" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
 
-    <div class="mb-4 flex justify-between text-sm font-semibold">
-      <span>تاريخ الاستخراج: <span id="printCurrentDate"></span></span>
-      <span>الفوج التربوي المحدد: <span id="printSelectedGroup" class="font-bold underline text-emerald-800">الكل</span></span>
-    </div>
+      <div>
+        <label class="text-[11px] font-bold text-slate-600 mb-1 block">رابط Web App الخاص بـ Google Apps Script</label>
+        <input type="text" id="scriptUrl" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-mono outline-none focus:ring-2 focus:ring-blue-500" placeholder="https://script.google.com/macros/s/.../exec">
+      </div>
 
-    <table class="w-full border-collapse border border-slate-800 text-right text-xs mb-8">
-      <thead>
-        <tr class="bg-slate-100 border-b border-slate-800">
-          <th class="border border-slate-800 p-2 w-24">التاريخ</th>
-          <th class="border border-slate-800 p-2 w-20">الفوج</th>
-          <th class="border border-slate-800 p-2 w-24">التوقيت</th>
-          <th class="border border-slate-800 p-2">العمل المزمع إنجازه في الحصة القادمة</th>
-          <th class="border border-slate-800 p-2 w-32">ملاحظات</th>
-        </tr>
-      </thead>
-      <tbody id="printTableBody">
-        <!-- تعبئة الطباعة -->
-      </tbody>
-    </table>
+      <div class="bg-blue-50 p-2.5 rounded-xl border border-blue-200 text-[11px] text-blue-900 leading-relaxed">
+        <strong>طريقة الربط:</strong> أنشئ جدول Google Sheets، ثم اذهب إلى <em>توسيعات ➔ Apps Script</em> وانشر السكربت كـ Web App مع صلاحيات (Anyone)، ثم انسخ الرابط وضع هنا للحفظ التلقائي في السحاب.
+      </div>
 
-    <div class="grid grid-cols-3 text-center text-xs font-bold pt-6 border-t border-slate-300">
-      <div>تأشيرة الأستاذ(ة)</div>
-      <div>تأشيرة السيد مدير المؤسسة</div>
-      <div>تأشيرة السيد المفتش</div>
+      <button onclick="saveSettings()" class="w-full bg-slate-900 text-white font-bold py-2 rounded-xl text-xs hover:bg-slate-800 transition">
+        حفظ وتأكيد الإعدادات
+      </button>
     </div>
   </div>
 
+  <!-- منطقة الطباعة الرسمية الخفية (تظهر أثناء الطباعة فقط) -->
+  <div id="printableArea" class="hidden">
+    <div class="p-8 font-serif" dir="rtl">
+      <!-- الهيدر الرسمي -->
+      <div class="flex justify-between items-center border-b-2 border-black pb-4 mb-6">
+        <div>
+          <h2 class="text-xl font-bold">الجمهورية الجزائرية الديمقراطية الشعبية</h2>
+          <h3 class="text-md font-semibold">وزارة التربية الوطنية</h3>
+          <p class="text-sm mt-1">المادة: العلوم الفيزيائية والتكنولوجيا</p>
+        </div>
+        <div class="text-left">
+          <h1 class="text-2xl font-extrabold border-2 border-black p-2 rounded">الكراس اليومي للأستاذ</h1>
+          <p class="text-sm mt-1 font-bold">الأستاذ: حواش زكرياء</p>
+        </div>
+      </div>
+
+      <!-- جدول الحصص للمعاينة والطباعة -->
+      <table class="w-full border-collapse border border-black text-center text-sm mb-8">
+        <thead>
+          <tr class="bg-gray-200">
+            <th class="border border-black p-2 w-12">الرقم</th>
+            <th class="border border-black p-2 w-28">التاريخ</th>
+            <th class="border border-black p-2 w-24">التوقيت</th>
+            <th class="border border-black p-2 w-24">الفوج</th>
+            <th class="border border-black p-2">العمل المزمع إنجازه بالحصة القادمة</th>
+            <th class="border border-black p-2 w-32">ملاحظات</th>
+          </tr>
+        </thead>
+        <tbody id="printTableBody">
+          <!-- ملء البيانات المفلترة للطباعة -->
+        </tbody>
+      </table>
+
+      <!-- تأشيرة الإدارة والمفتش -->
+      <div class="grid grid-cols-2 text-center mt-12 pt-6">
+        <div>
+          <p class="font-bold underline mb-12">تأشيرة السيد(ة) مدير(ة) المؤسسة</p>
+        </div>
+        <div>
+          <p class="font-bold underline mb-12">تأشيرة السيد مفتش المادة</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript المنطقية للتطبيق -->
   <script>
-    // تهيئة الأيقونات
-    lucide.createIcons();
-
-    // المفاتيح والمتغيرات الأساسية
-    const STORAGE_KEY_RECORDS = "TEACHER_LOGBOOK_RECORDS_V3";
-    const STORAGE_KEY_CONFIG = "TEACHER_LOGBOOK_CONFIG_V3";
-
-    let records = [];
-    let config = { scriptUrl: "" };
-
-    // إعدادات الصوت والـ Web Speech API
+    // تهيئة المتغيرات والإعدادات
+    let records = JSON.parse(localStorage.getItem('dailyLogRecords') || '[]');
+    let scriptUrl = localStorage.getItem('scriptUrl') || '';
     let recognition = null;
-    let isSpeechActive = false;
-    let audioContext = null;
-    let analyser = null;
-    let micStream = null;
+    let isRecording = false;
 
-    // استدعاء التحميل عند بدء التشغيل
+    // تهيئة التطبيق عند الفتح
     window.onload = function() {
-      document.getElementById("dateInput").value = new Date().toISOString().split("T")[0];
-      loadSavedData();
-      initSpeechEngine();
+      lucide.createIcons();
+      document.getElementById('sessionDate').valueAsDate = new Date();
+      if(scriptUrl) document.getElementById('scriptUrl').value = scriptUrl;
+      updateBadge();
+      initSpeechRecognition();
     };
 
-    function loadSavedData() {
-      try {
-        const savedRecs = localStorage.getItem(STORAGE_KEY_RECORDS);
-        if (savedRecs) records = JSON.parse(savedRecs);
-
-        const savedConfig = localStorage.getItem(STORAGE_KEY_CONFIG);
-        if (savedConfig) {
-          config = JSON.parse(savedConfig);
-          document.getElementById("scriptUrlInput").value = config.scriptUrl || "";
-        }
-      } catch (e) {
-        console.error("خطأ في قراءة التخزين المحلي", e);
-      }
-    }
-
-    // استرجاع أعمال فوج محدد مباشرة من شاشة الإدخال
-    function retrieveGroupHistory() {
-      const g = document.getElementById("groupInput").value.trim();
-      if (!g) {
-        alert("يرجى كتابة اسم الفوج التربوي أولاً (مثال: 3م1) في خانة الفوج لاسترجاع أعماله.");
-        return;
-      }
-      openModal('historyModal');
-      document.getElementById("filterInput").value = g;
-      filterRecords();
-    }
-
-    // تهيئة محرك الصوت والتسجيل
-    function initSpeechEngine() {
-      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-        document.getElementById("speechStatus").textContent = "الصوت غير مدعوم";
-        document.getElementById("speechStatus").classList.replace("bg-slate-700", "bg-rose-900");
-        return;
-      }
-
+    // إعداد الميكروفون والتحويل الصوتي
+    function initSpeechRecognition() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognition = new SpeechRecognition();
-      recognition.lang = "ar-SA"; // استخدام الفصحى لدقة المصطلحات
-      recognition.continuous = true;
-      recognition.interimResults = true;
+      if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.lang = 'ar-DZ'; // اللهجة/اللغة العربية
+        recognition.interimResults = false;
 
-      recognition.onstart = function() {
-        isSpeechActive = true;
-        updateUIState(true);
-        startAudioVisualizer();
-      };
+        recognition.onstart = function() {
+          isRecording = true;
+          document.getElementById('micBtn').className = "px-2.5 py-1 bg-red-600 text-white rounded-full text-[11px] font-bold flex items-center gap-1 animate-pulse";
+          document.getElementById('micText').innerText = "جاري الاستماع...";
+        };
 
-      recognition.onresult = function(event) {
-        let finalScript = "";
-        let interimScript = "";
+        recognition.onresult = function(event) {
+          const transcript = event.results[0][0].transcript;
+          const textarea = document.getElementById('plannedWork');
+          textarea.value = textarea.value ? textarea.value + ' ' + transcript : transcript;
+        };
 
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          if (event.results[i].isFinal) {
-            finalScript += event.results[i][0].transcript;
-          } else {
-            interimScript += event.results[i][0].transcript;
-          }
-        }
+        recognition.onerror = function(event) {
+          console.error("خطأ الميكروفون:", event.error);
+          stopVoice();
+        };
 
-        if (finalScript) {
-          const textarea = document.getElementById("plannedWorkInput");
-          textarea.value = (textarea.value + " " + finalScript).trim();
-        }
-        document.getElementById("livePreview").textContent = interimScript ? `جاري النطق: (${interimScript})` : "";
-      };
-
-      recognition.onerror = function(event) {
-        console.warn("Speech error:", event.error);
-        stopSpeech();
-      };
-
-      recognition.onend = function() {
-        if (isSpeechActive) {
-          try { recognition.start(); } catch(e) { stopSpeech(); }
-        } else {
-          stopSpeech();
-        }
-      };
+        recognition.onend = function() {
+          stopVoice();
+        };
+      }
     }
 
-    function toggleSpeech() {
+    function toggleVoiceInput() {
       if (!recognition) {
-        alert("المتصفح لا يدعم التسجيل الصوتي المباشر.");
+        alert("المتصفح لا يدعم التدوين الصوتي المباشر. استخدم زر الإدخال السريع أو اكتب مباشرة.");
         return;
       }
-
-      if (isSpeechActive) {
-        isSpeechActive = false;
+      if (isRecording) {
         recognition.stop();
-        stopSpeech();
       } else {
         try {
           recognition.start();
         } catch(e) {
-          console.error(e);
+          stopVoice();
         }
       }
     }
 
-    function stopSpeech() {
-      isSpeechActive = false;
-      updateUIState(false);
-      stopAudioVisualizer();
-      document.getElementById("livePreview").textContent = "";
+    function stopVoice() {
+      isRecording = false;
+      document.getElementById('micBtn').className = "px-2.5 py-1 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 rounded-full text-[11px] font-bold flex items-center gap-1 transition";
+      document.getElementById('micText').innerText = "إملاء صوتي";
     }
 
-    function updateUIState(active) {
-      const btn = document.getElementById("recordBtn");
-      const btnText = document.getElementById("recordBtnText");
-      const status = document.getElementById("speechStatus");
-
-      if (active) {
-        btn.classList.replace("bg-emerald-600", "bg-rose-600");
-        btn.classList.replace("hover:bg-emerald-500", "hover:bg-rose-500");
-        btnText.textContent = "إيقاف التسجيل";
-        status.textContent = "جاري الاستماع...";
-        status.classList.replace("bg-slate-700", "bg-rose-700");
-      } else {
-        btn.classList.replace("bg-rose-600", "bg-emerald-600");
-        btn.classList.replace("hover:bg-rose-500", "hover:bg-emerald-500");
-        btnText.textContent = "بدء الإملاء الصوتي";
-        status.textContent = "جاهز";
-        status.classList.replace("bg-rose-700", "bg-slate-700");
-      }
+    // إضافة نص سريع
+    function appendQuickText(text) {
+      const textarea = document.getElementById('plannedWork');
+      textarea.value = textarea.value ? textarea.value + ' ' + text : text;
     }
 
-    // مستشعر الصوت البصري الحي
-    async function startAudioVisualizer() {
-      try {
-        micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        analyser = audioContext.createAnalyser();
-        const source = audioContext.createMediaStreamSource(micStream);
-        source.connect(analyser);
-        analyser.fftSize = 32;
-        animateVU();
-      } catch (e) {
-        console.warn("الميكروفون غير متاح للرسم البياني", e);
-      }
-    }
+    // حفظ السجل المحلي وفي Google Sheets
+    function saveRecord() {
+      const date = document.getElementById('sessionDate').value;
+      const timing = document.getElementById('sessionTiming').value;
+      const group = document.getElementById('sessionGroup').value;
+      const work = document.getElementById('plannedWork').value.trim();
+      const notes = document.getElementById('sessionNotes').value.trim();
 
-    function animateVU() {
-      if (!isSpeechActive || !analyser) return;
-      const dataArray = new Uint8Array(analyser.frequencyBinCount);
-      analyser.getByteFrequencyData(dataArray);
-      let average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-
-      const vus = [document.getElementById("vu1"), document.getElementById("vu2"), document.getElementById("vu3"), document.getElementById("vu4"), document.getElementById("vu5")];
-      vus.forEach((vu, idx) => {
-        if (average > (idx + 1) * 15) {
-          vu.classList.replace("bg-slate-700", "bg-emerald-400");
-        } else {
-          vu.classList.replace("bg-emerald-400", "bg-slate-700");
-        }
-      });
-
-      requestAnimationFrame(animateVU);
-    }
-
-    function stopAudioVisualizer() {
-      if (micStream) micStream.getTracks().forEach(t => t.stop());
-      if (audioContext) audioContext.close();
-      const vus = [document.getElementById("vu1"), document.getElementById("vu2"), document.getElementById("vu3"), document.getElementById("vu4"), document.getElementById("vu5")];
-      vus.forEach(vu => vu.classList.replace("bg-emerald-400", "bg-slate-700"));
-    }
-
-    // حفظ السجل المحلي والإرسال إلى Google Sheets
-    async function saveEntry() {
-      const group = document.getElementById("groupInput").value.trim();
-      const date = document.getElementById("dateInput").value;
-      const timing = document.getElementById("timingInput").value.trim();
-      const plannedWork = document.getElementById("plannedWorkInput").value.trim();
-      const notes = document.getElementById("notesInput").value.trim();
-
-      if (!group || !plannedWork) {
-        alert("يرجى ملء الفوج التربوي والعمل المزمع إنجازه للحصة القادمة.");
+      if (!work) {
+        alert("يرجى إدخال العمل المزمع إنجازه أولاً!");
         return;
       }
-
-      const saveBtn = document.getElementById("saveBtn");
-      saveBtn.disabled = true;
-      saveBtn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>...</span>`;
-      lucide.createIcons();
 
       const newRecord = {
-        id: "rec_" + Date.now(),
-        date: date,
-        group: group,
-        timing: timing,
-        plannedWork: plannedWork,
-        notes: notes
+        id: Date.now(),
+        date,
+        timing,
+        group,
+        work,
+        notes
       };
 
-      // حفظ محلي فوري
       records.unshift(newRecord);
-      localStorage.setItem(STORAGE_KEY_RECORDS, JSON.stringify(records));
+      localStorage.setItem('dailyLogRecords', JSON.stringify(records));
+      updateBadge();
 
-      // إرسال سحابي إلى Google Sheets إذا توفر الرابط
-      if (config.scriptUrl) {
-        try {
-          await fetch(config.scriptUrl, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(newRecord)
-          });
-        } catch (err) {
-          console.warn("تعذر الإرسال للشيت السحابي", err);
-        }
+      // المزامنة مع Google Sheets في حال توفر الرابط
+      if (scriptUrl) {
+        fetch(scriptUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newRecord)
+        }).catch(err => console.log("خطأ مزامنة السحاب:", err));
       }
 
-      alert("تم حفظ خطة الحصة القادمة بنجاح!");
-      document.getElementById("plannedWorkInput").value = "";
-      document.getElementById("notesInput").value = "";
+      // إعادة ضبط الحقل وتأكيد الحفظ
+      document.getElementById('plannedWork').value = '';
+      document.getElementById('sessionNotes').value = '';
+      alert("تم حفظ الخطة في الكراس بنجاح ✅");
+    }
 
-      saveBtn.disabled = false;
-      saveBtn.innerHTML = `<i data-lucide="save" class="w-4 h-4"></i><span>حفظ</span>`;
+    // تصفية السجل المباشرة لفوج معين
+    function filterRecordsByCurrentGroup() {
+      const currentGroup = document.getElementById('sessionGroup').value;
+      document.getElementById('modalGroupFilter').value = currentGroup;
+      openLogModal();
+    }
+
+    // عرض وتصنيف السجلات
+    function renderLogs() {
+      const filterGroup = document.getElementById('modalGroupFilter').value;
+      const listContainer = document.getElementById('logList');
+      listContainer.innerHTML = '';
+
+      const filtered = filterGroup === 'ALL' 
+        ? records 
+        : records.filter(r => r.group === filterGroup);
+
+      if (filtered.length === 0) {
+        listContainer.innerHTML = `<div class="text-center py-8 text-slate-400 text-xs">لا توجد حصص مسجلة لهذه الفئة حتى الآن.</div>`;
+        return;
+      }
+
+      filtered.forEach((item) => {
+        const card = document.createElement('div');
+        card.className = "bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs flex flex-col gap-1 relative";
+        card.innerHTML = `
+          <div class="flex justify-between items-center font-bold text-slate-700">
+            <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-[10px]">${item.group}</span>
+            <span class="text-slate-500">${item.date} (${item.timing})</span>
+          </div>
+          <p class="text-slate-800 font-medium mt-1">${item.work}</p>
+          ${item.notes ? `<p class="text-[10px] text-slate-500 bg-white p-1 rounded border border-slate-100">ملاحظة: ${item.notes}</p>` : ''}
+          <button onclick="deleteRecord(${item.id})" class="absolute left-2 bottom-2 text-red-400 hover:text-red-600 p-1">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
+        `;
+        listContainer.appendChild(card);
+      });
       lucide.createIcons();
     }
 
-    // النوافذ المنبثقة والسجل مع أزرار تصفية الأقسام
-    function openModal(id) {
-      document.getElementById(id).classList.remove("hidden");
-      if (id === 'historyModal') {
-        renderQuickGroupFilters();
-        renderRecords(records);
+    function deleteRecord(id) {
+      if(confirm("هل تريد إزالة هذا السجل؟")) {
+        records = records.filter(r => r.id !== id);
+        localStorage.setItem('dailyLogRecords', JSON.stringify(records));
+        updateBadge();
+        renderLogs();
       }
     }
 
-    function closeModal(id) {
-      document.getElementById(id).classList.add("hidden");
-    }
-
-    // بناء أزرار التصفية السريعة لكل فوج تربوي
-    function renderQuickGroupFilters() {
-      const container = document.getElementById("groupsQuickFilter");
-      const uniqueGroups = [...new Set(records.map(r => r.group).filter(Boolean))];
-
-      if (!uniqueGroups.length) {
-        container.innerHTML = "";
-        return;
+    function updateBadge() {
+      const badge = document.getElementById('logBadge');
+      if (records.length > 0) {
+        badge.innerText = records.length;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
       }
-
-      let html = `<button onclick="setFilter('')" class="bg-emerald-600 text-white text-[10px] px-2.5 py-1 rounded-full font-bold whitespace-nowrap">عرض الكل</button>`;
-      html += uniqueGroups.map(g => `
-        <button onclick="setFilter('${g}')" class="bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-700 text-[10px] px-2.5 py-1 rounded-full font-bold whitespace-nowrap">
-          ${g}
-        </button>
-      `).join("");
-
-      container.innerHTML = html;
     }
 
-    function setFilter(groupName) {
-      document.getElementById("filterInput").value = groupName;
-      filterRecords();
+    // فتح وإغلاق النوافذ المنبثقة
+    function openLogModal() {
+      renderLogs();
+      document.getElementById('logModal').classList.remove('hidden');
     }
 
-    function renderRecords(data) {
-      const container = document.getElementById("recordsList");
-      if (!data.length) {
-        container.innerHTML = `<div class="text-center text-slate-500 py-8 text-xs">لا توجد سجلات مطابقة لهذا الفوج.</div>`;
-        return;
-      }
-
-      container.innerHTML = data.map(r => `
-        <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl space-y-1 text-xs">
-          <div class="flex justify-between items-center text-[10px] text-emerald-400 font-bold border-b border-slate-800 pb-1">
-            <span class="bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800/40">الفوج: ${r.group}</span>
-            <span>${r.date} (${r.timing || 'غير محدد'})</span>
-          </div>
-          <p class="text-slate-200 leading-relaxed font-medium pt-1">${r.plannedWork}</p>
-          ${r.notes ? `<div class="text-[10px] text-slate-400 italic">ملاحظة: ${r.notes}</div>` : ''}
-        </div>
-      `).join("");
+    function closeLogModal() {
+      document.getElementById('logModal').classList.add('hidden');
     }
 
-    function filterRecords() {
-      const q = document.getElementById("filterInput").value.toLowerCase().trim();
-      const filtered = records.filter(r => r.group.toLowerCase().includes(q) || r.plannedWork.toLowerCase().includes(q));
-      renderRecords(filtered);
+    function openSettings() {
+      document.getElementById('settingsModal').classList.remove('hidden');
+    }
+
+    function closeSettings() {
+      document.getElementById('settingsModal').classList.add('hidden');
     }
 
     function saveSettings() {
-      config.scriptUrl = document.getElementById("scriptUrlInput").value.trim();
-      localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(config));
-      alert("تم حفظ إعدادات الرابط بنجاح!");
-      closeModal('settingsModal');
+      scriptUrl = document.getElementById('scriptUrl').value.trim();
+      localStorage.setItem('scriptUrl', scriptUrl);
+      closeSettings();
+      alert("تم حفظ رابط قاعدة البيانات ✅");
     }
 
-    function copyAppsScriptCode() {
-      const code = `function doPost(e) {
-  try {
-    var d = JSON.parse(e.postData.contents);
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow(["المعرف", "التاريخ", "الفوج التربوي", "التوقيت", "العمل المزمع إنجازه للحصة القادمة", "ملاحظات"]);
-    }
-    sheet.appendRow([d.id || "", d.date || "", d.group || "", d.timing || "", d.plannedWork || "", d.notes || ""]);
-    return ContentService.createTextOutput(JSON.stringify({ status: "success" })).setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() })).setMimeType(ContentService.MimeType.JSON);
-  }
-}`;
-      navigator.clipboard.writeText(code);
-      document.getElementById("copyBtnText").textContent = "تم النسخ!";
-      setTimeout(() => document.getElementById("copyBtnText").textContent = "نسخ الكود", 2000);
-    }
+    // تجهيز وطباعة الوثيقة الرسمية
+    function printLogbook() {
+      const filterGroup = document.getElementById('modalGroupFilter').value;
+      const filtered = filterGroup === 'ALL' 
+        ? records 
+        : records.filter(r => r.group === filterGroup);
 
-    function triggerPrint() {
-      const selectedGroup = document.getElementById("filterInput").value.trim();
-      document.getElementById("printCurrentDate").textContent = new Date().toLocaleDateString("ar-DZ");
-      document.getElementById("printSelectedGroup").textContent = selectedGroup ? selectedGroup : "كافة الأفواج";
+      if (filtered.length === 0) {
+        alert("لا توجد بيانات مطبوعة لهذا الفوج!");
+        return;
+      }
 
-      const targetRecords = selectedGroup ? records.filter(r => r.group.toLowerCase().includes(selectedGroup.toLowerCase())) : records;
+      const tbody = document.getElementById('printTableBody');
+      tbody.innerHTML = '';
 
-      const tbody = document.getElementById("printTableBody");
-      tbody.innerHTML = targetRecords.map(r => `
-        <tr>
-          <td class="border border-slate-800 p-2 text-center">${r.date}</td>
-          <td class="border border-slate-800 p-2 font-bold text-center">${r.group}</td>
-          <td class="border border-slate-800 p-2 text-center">${r.timing || '-'}</td>
-          <td class="border border-slate-800 p-2">${r.plannedWork}</td>
-          <td class="border border-slate-800 p-2 text-slate-600">${r.notes || '-'}</td>
-        </tr>
-      `).join("");
+      filtered.forEach((item, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="border border-black p-2 font-bold">${index + 1}</td>
+          <td class="border border-black p-2">${item.date}</td>
+          <td class="border border-black p-2">${item.timing}</td>
+          <td class="border border-black p-2 font-bold">${item.group}</td>
+          <td class="border border-black p-2 text-right">${item.work}</td>
+          <td class="border border-black p-2">${item.notes || '-'}</td>
+        `;
+        tbody.appendChild(row);
+      });
+
       window.print();
     }
   </script>
