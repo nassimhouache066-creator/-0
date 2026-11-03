@@ -30,7 +30,7 @@
 
 <body class="bg-slate-100 text-slate-800 flex flex-col h-screen overflow-hidden select-none">
 
-  <!-- Header / الشريط العلوي المربوط بالسحابة -->
+  <!-- Header / الشريط العلوي السحابي -->
   <header class="bg-slate-900 text-white px-3 py-2 shrink-0 shadow-md flex justify-between items-center z-10">
     <div class="flex items-center gap-2">
       <div class="bg-blue-600 p-1.5 rounded-lg flex items-center justify-center shadow-inner">
@@ -43,24 +43,20 @@
     </div>
     
     <div class="flex items-center gap-1.5">
-      <!-- زر تحديث السحابة يدويًا -->
       <button onclick="fetchCloudData()" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-blue-400 rounded-lg transition" title="جلب بيانات السحابة">
         <i data-lucide="refresh-cw" id="syncIcon" class="w-4 h-4"></i>
       </button>
 
-      <!-- زر الحفظ المباشر -->
       <button onclick="saveRecord()" class="bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow transition active:scale-95" title="حفظ ومزامنة">
         <i data-lucide="save" class="w-4 h-4"></i>
         <span class="hidden sm:inline">حفظ</span>
       </button>
       
-      <!-- زر السجل -->
       <button onclick="openLogModal()" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition relative" title="السجل والطباعة">
         <i data-lucide="history" class="w-4 h-4"></i>
         <span id="logBadge" class="absolute -top-1 -right-1 bg-blue-500 text-white text-[9px] font-bold px-1 rounded-full hidden">0</span>
       </button>
 
-      <!-- الإعدادات -->
       <button onclick="openSettings()" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition" title="الإعدادات والأفواج">
         <i data-lucide="settings" class="w-4 h-4"></i>
       </button>
@@ -78,15 +74,10 @@
           <input type="date" id="sessionDate" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-1.5 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none">
         </div>
         <div>
-          <label class="text-[11px] font-bold text-slate-500 mb-0.5 block">التوقيت الزمني</label>
+          <label class="text-[11px] font-bold text-slate-500 mb-0.5 block">فترة الحصة</label>
           <select id="sessionTiming" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-1.5 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none">
-            <option value="08:00 - 09:00">08:00 - 09:00</option>
-            <option value="09:00 - 10:00">09:00 - 10:00</option>
-            <option value="10:00 - 11:00">10:00 - 11:00</option>
-            <option value="11:00 - 12:00">11:00 - 12:00</option>
-            <option value="13:30 - 14:30">13:30 - 14:30</option>
-            <option value="14:30 - 15:30">14:30 - 15:30</option>
-            <option value="15:30 - 16:30">15:30 - 16:30</option>
+            <option value="صباحاً">صباحاً</option>
+            <option value="مساءً">مساءً</option>
           </select>
         </div>
       </div>
@@ -206,7 +197,7 @@
           <tr class="bg-gray-200">
             <th class="border border-black p-2 w-12">الرقم</th>
             <th class="border border-black p-2 w-28">التاريخ</th>
-            <th class="border border-black p-2 w-24">التوقيت</th>
+            <th class="border border-black p-2 w-24">الفترة</th>
             <th class="border border-black p-2 w-24">الفوج</th>
             <th class="border border-black p-2">العمل المزمع إنجازه بالحصة القادمة</th>
             <th class="border border-black p-2 w-32">ملاحظات</th>
@@ -235,14 +226,13 @@
       document.getElementById('sessionDate').valueAsDate = new Date();
       if(scriptUrl) {
         document.getElementById('scriptUrl').value = scriptUrl;
-        fetchCloudData(); // جلب تلقائي للبيانات المحدثة عند فتح المنصة من أي جهاز
+        fetchCloudData();
       }
       updateGroupsUI();
       updateBadge();
       initSpeechRecognition();
     };
 
-    // جلب البيانات من السحابة (Google Sheets)
     function fetchCloudData() {
       if (!scriptUrl) return;
       const syncIcon = document.getElementById('syncIcon');
@@ -264,7 +254,6 @@
         });
     }
 
-    // إرسال المزامنة الكاملة للسحابة
     function pushCloudData() {
       if (!scriptUrl) return;
       fetch(scriptUrl, {
@@ -381,7 +370,6 @@
       localStorage.setItem('dailyLogRecords', JSON.stringify(records));
       updateBadge();
 
-      // مزامنة مع السحابة فوراً
       pushCloudData();
 
       document.getElementById('plannedWork').value = '';
