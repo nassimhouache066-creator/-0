@@ -19,7 +19,6 @@
       touch-action: manipulation;
     }
 
-    /* اخفاء شريط التمرير لمعاينة شاشة واحدة */
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -34,43 +33,49 @@
 
 <body class="bg-slate-100 text-slate-800 flex flex-col h-screen overflow-hidden select-none">
 
-  <!-- Header / الشريط العلوي -->
-  <header class="bg-slate-900 text-white p-2.5 shrink-0 shadow-md flex justify-between items-center z-10">
+  <!-- Header / الشريط العلوي المتطور -->
+  <header class="bg-slate-900 text-white px-3 py-2 shrink-0 shadow-md flex justify-between items-center z-10">
     <div class="flex items-center gap-2">
-      <div class="bg-blue-600 p-1.5 rounded-lg flex items-center justify-center">
+      <div class="bg-blue-600 p-1.5 rounded-lg flex items-center justify-center shadow-inner">
         <i data-lucide="book-open" class="w-5 h-5 text-white"></i>
       </div>
       <div>
-        <h1 class="text-sm font-bold leading-tight">الكراس اليومي الرقمي</h1>
+        <h1 class="text-xs font-bold leading-tight">الكراس اليومي الرقمي</h1>
         <p class="text-[10px] text-slate-400">الأستاذ حواش زكرياء</p>
       </div>
     </div>
     
+    <!-- الأيقونات العلوية: حفظ سريع، السجل، والإعدادات -->
     <div class="flex items-center gap-1.5">
-      <button onclick="openSettings()" class="p-1.5 text-slate-300 hover:text-white rounded-lg hover:bg-slate-800 transition">
-        <i data-lucide="settings" class="w-5 h-5"></i>
+      <button onclick="saveRecord()" class="bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow transition active:scale-95" title="حفظ مباشر">
+        <i data-lucide="save" class="w-4 h-4"></i>
+        <span class="hidden sm:inline">حفظ</span>
       </button>
-      <button onclick="openLogModal()" class="p-1.5 text-slate-300 hover:text-white rounded-lg hover:bg-slate-800 transition relative">
-        <i data-lucide="history" class="w-5 h-5"></i>
+      
+      <button onclick="openLogModal()" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition relative" title="السجل والطباعة">
+        <i data-lucide="history" class="w-4 h-4"></i>
         <span id="logBadge" class="absolute -top-1 -right-1 bg-blue-500 text-white text-[9px] font-bold px-1 rounded-full hidden">0</span>
+      </button>
+
+      <button onclick="openSettings()" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition" title="الإعدادات والأفواج">
+        <i data-lucide="settings" class="w-4 h-4"></i>
       </button>
     </div>
   </header>
 
-  <!-- Main Viewport / واجهة التدوين المباشرة (شاشة واحدة بدون تمرير) -->
+  <!-- Main Viewport / واجهة التدوين المباشرة -->
   <main class="flex-1 flex flex-col justify-between p-2.5 gap-2 overflow-hidden">
     
     <!-- بيانات الحصة (التاريخ، الفوج، التوقيت) -->
     <div class="bg-white p-2.5 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-2 shrink-0">
       
-      <!-- التاريخ والتوقيت -->
       <div class="grid grid-cols-2 gap-2">
         <div>
           <label class="text-[11px] font-bold text-slate-500 mb-0.5 block">التاريخ</label>
           <input type="date" id="sessionDate" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-1.5 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none">
         </div>
         <div>
-          <label class="text-[11px] font-bold text-slate-500 mb-0.5 block">التوقيت الزمن</label>
+          <label class="text-[11px] font-bold text-slate-500 mb-0.5 block">التوقيت الزمني</label>
           <select id="sessionTiming" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-1.5 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="08:00 - 09:00">08:00 - 09:00</option>
             <option value="09:00 - 10:00">09:00 - 10:00</option>
@@ -83,26 +88,23 @@
         </div>
       </div>
 
-      <!-- الفوج التربوي وتصفية السجل المباشرة -->
+      <!-- اختيار الفوج وتصفية السجل الفورية -->
       <div class="flex items-center gap-1.5">
         <div class="flex-1">
           <label class="text-[11px] font-bold text-slate-500 mb-0.5 block">الفوج التربوي</label>
           <select id="sessionGroup" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-1.5 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none">
-            <option value="2 م 1">2 متوسط 1</option>
-            <option value="2 م 2">2 متوسط 2</option>
-            <option value="4 م 1">4 متوسط 1</option>
-            <option value="4 م 2">4 متوسط 2</option>
+            <!-- يتم تعبئتها ديناميكياً -->
           </select>
         </div>
-        <button onclick="filterRecordsByCurrentGroup()" title="تصفية واسترجاع سجل هذا الفوج" class="self-end p-2 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 rounded-lg text-xs font-bold flex items-center gap-1 transition">
-          <i data-lucide="filter" class="w-4 h-4 text-blue-600"></i>
+        <button onclick="filterRecordsByCurrentGroup()" title="استرجاع سجل هذا الفوج فقط" class="self-end px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 rounded-lg text-xs font-bold flex items-center gap-1 transition">
+          <i data-lucide="filter" class="w-3.5 h-3.5 text-blue-600"></i>
           <span>سجل الفوج</span>
         </button>
       </div>
 
     </div>
 
-    <!-- العمل المزمز إنجازه بالحصة القادمة (مربع الإدخال الرئيسي) -->
+    <!-- العمل المزمع إنجازه بالحصة القادمة (محرر نصي بدون اقتراحات مزعجة) -->
     <div class="flex-1 bg-white p-2.5 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between overflow-hidden">
       
       <div class="flex justify-between items-center mb-1">
@@ -112,40 +114,24 @@
         </span>
         
         <!-- زر الميكروفون للتعرف الصوتي -->
-        <button id="micBtn" onclick="toggleVoiceInput()" class="px-2.5 py-1 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 rounded-full text-[11px] font-bold flex items-center gap-1 transition">
+        <button id="micBtn" onclick="toggleVoiceInput()" class="px-2 py-1 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 rounded-full text-[11px] font-bold flex items-center gap-1 transition">
           <i data-lucide="mic" class="w-3.5 h-3.5"></i>
           <span id="micText">إملاء صوتي</span>
         </button>
       </div>
 
-      <!-- محرر النص المباشر -->
-      <textarea id="plannedWork" class="w-full flex-1 bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none resize-none no-scrollbar" placeholder="اكتب أو أملِ صوتياً العمل المزمع إنجازه (مثال: دراسة التحليل الكهربائي للماء، حل التمرين 4 ص 30...)"></textarea>
-
-      <!-- شريط الاختصارات السريعة للتدوين بضغطة زر -->
-      <div class="flex items-center gap-1 overflow-x-auto no-scrollbar pt-1.5 border-t border-slate-100">
-        <span class="text-[10px] text-slate-400 shrink-0">إدخال سريع:</span>
-        <button onclick="appendQuickText('تقويم تشخيصي للترابط العصبي.')" class="bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-600 px-2 py-0.5 rounded text-[10px] shrink-0 border border-slate-200">تقويم تشخيصي</button>
-        <button onclick="appendQuickText('إنجاز الوضعية التعلمية الاستكشافية.')" class="bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-600 px-2 py-0.5 rounded text-[10px] shrink-0 border border-slate-200">وضعية تعلمية</button>
-        <button onclick="appendQuickText('حل التمارين المحضرة على الكراس.')" class="bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-600 px-2 py-0.5 rounded text-[10px] shrink-0 border border-slate-200">حل تمارين</button>
-        <button onclick="appendQuickText('حصة معالجة بيداغوجية.')" class="bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-600 px-2 py-0.5 rounded text-[10px] shrink-0 border border-slate-200">معالجة بيداغوجية</button>
-      </div>
-
+      <!-- حقل إدخال نظيف بالكامل بدون شريط اقتراحات -->
+      <textarea id="plannedWork" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="w-full flex-1 bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none resize-none no-scrollbar" placeholder="اكتب أو أملِ صوتياً العمل المزمع إنجازه للحصة القادمة..."></textarea>
     </div>
 
-    <!-- ملاحظات سريعة (اختياري) -->
+    <!-- ملاحظات سريعة -->
     <div class="bg-white p-2 rounded-xl shadow-sm border border-slate-200 shrink-0">
-      <input type="text" id="sessionNotes" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="ملاحظات الحصة (غياب، تأخر، استدعاء ولي...)">
+      <input type="text" id="sessionNotes" autocomplete="off" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="ملاحظات الحصة (غياب، تأخر، ملاحظات بيداغوجية...)">
     </div>
-
-    <!-- زر الحفظ المباشر (بارز وثابت في الأسفل) -->
-    <button onclick="saveRecord()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl shadow-md flex justify-center items-center gap-2 text-xs active:scale-[0.99] transition shrink-0">
-      <i data-lucide="save" class="w-4 h-4"></i>
-      <span>حفظ وتدوين الخطة في الكراس والشيت</span>
-    </button>
 
   </main>
 
-  <!-- النافذة المنبثقة: السجل والطباعة المخصصة لجميع الأفواج أو الفوج المحدد -->
+  <!-- نافذة السجل والطباعة -->
   <div id="logModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-center items-end sm:items-center hidden">
     <div class="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl h-[85vh] flex flex-col overflow-hidden shadow-2xl">
       
@@ -159,14 +145,9 @@
         </button>
       </div>
 
-      <!-- أدوات الفلترة في السجل -->
       <div class="p-2.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-2">
         <select id="modalGroupFilter" onchange="renderLogs()" class="bg-white border border-slate-300 rounded-lg p-1.5 text-xs font-bold text-slate-700 outline-none">
           <option value="ALL">جميع الأفواج التربوية</option>
-          <option value="2 م 1">2 متوسط 1</option>
-          <option value="2 م 2">2 متوسط 2</option>
-          <option value="4 م 1">4 متوسط 1</option>
-          <option value="4 م 2">4 متوسط 2</option>
         </select>
 
         <button onclick="printLogbook()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm transition">
@@ -175,25 +156,35 @@
         </button>
       </div>
 
-      <!-- قائمة السجلات -->
       <div id="logList" class="flex-1 p-3 overflow-y-auto space-y-2 no-scrollbar">
-        <!-- يتم ملؤه تلقائياً بالسكربت -->
+        <!-- سجلات الأفواج -->
       </div>
-
     </div>
   </div>
 
-  <!-- النافذة المنبثقة: الإعدادات وربط Google Apps Script -->
+  <!-- نافذة الإعدادات وإدارة الأفواج وربط السكربت -->
   <div id="settingsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-center items-center p-4 hidden">
-    <div class="bg-white w-full max-w-md rounded-2xl p-4 shadow-2xl flex flex-col gap-3">
+    <div class="bg-white w-full max-w-md rounded-2xl p-4 shadow-2xl flex flex-col gap-3 max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center border-b pb-2">
         <h3 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
-          <i data-lucide="database" class="w-4 h-4 text-blue-600"></i>
-          إعدادات الربط بقاعدة البيانات (Google Sheets)
+          <i data-lucide="settings" class="w-4 h-4 text-blue-600"></i>
+          إعدادات المنصة والأفواج التربوية
         </h3>
         <button onclick="closeSettings()" class="text-slate-400 hover:text-slate-600">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
+      </div>
+
+      <!-- قسم إدارة الأفواج -->
+      <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex flex-col gap-2">
+        <label class="text-[11px] font-bold text-slate-700">إدارة الأفواج التربوية</label>
+        <div class="flex gap-1.5">
+          <input type="text" id="newGroupInput" placeholder="أضف فوجاً جديداً (مثال: 3 متوسط 1)" class="flex-1 bg-white border border-slate-300 rounded-lg p-1.5 text-xs outline-none">
+          <button onclick="addGroup()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">إضافة</button>
+        </div>
+        <div id="groupsTagsList" class="flex flex-wrap gap-1 mt-1">
+          <!-- وسوم الأفواج الحالية -->
+        </div>
       </div>
 
       <div>
@@ -201,20 +192,15 @@
         <input type="text" id="scriptUrl" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-mono outline-none focus:ring-2 focus:ring-blue-500" placeholder="https://script.google.com/macros/s/.../exec">
       </div>
 
-      <div class="bg-blue-50 p-2.5 rounded-xl border border-blue-200 text-[11px] text-blue-900 leading-relaxed">
-        <strong>طريقة الربط:</strong> أنشئ جدول Google Sheets، ثم اذهب إلى <em>توسيعات ➔ Apps Script</em> وانشر السكربت كـ Web App مع صلاحيات (Anyone)، ثم انسخ الرابط وضع هنا للحفظ التلقائي في السحاب.
-      </div>
-
       <button onclick="saveSettings()" class="w-full bg-slate-900 text-white font-bold py-2 rounded-xl text-xs hover:bg-slate-800 transition">
-        حفظ وتأكيد الإعدادات
+        حفظ الإعدادات وتحديث الأفواج
       </button>
     </div>
   </div>
 
-  <!-- منطقة الطباعة الرسمية الخفية (تظهر أثناء الطباعة فقط) -->
+  <!-- منطقة الطباعة الرسمية الخفية -->
   <div id="printableArea" class="hidden">
     <div class="p-8 font-serif" dir="rtl">
-      <!-- الهيدر الرسمي -->
       <div class="flex justify-between items-center border-b-2 border-black pb-4 mb-6">
         <div>
           <h2 class="text-xl font-bold">الجمهورية الجزائرية الديمقراطية الشعبية</h2>
@@ -227,7 +213,6 @@
         </div>
       </div>
 
-      <!-- جدول الحصص للمعاينة والطباعة -->
       <table class="w-full border-collapse border border-black text-center text-sm mb-8">
         <thead>
           <tr class="bg-gray-200">
@@ -239,52 +224,94 @@
             <th class="border border-black p-2 w-32">ملاحظات</th>
           </tr>
         </thead>
-        <tbody id="printTableBody">
-          <!-- ملء البيانات المفلترة للطباعة -->
-        </tbody>
+        <tbody id="printTableBody"></tbody>
       </table>
 
-      <!-- تأشيرة الإدارة والمفتش -->
       <div class="grid grid-cols-2 text-center mt-12 pt-6">
-        <div>
-          <p class="font-bold underline mb-12">تأشيرة السيد(ة) مدير(ة) المؤسسة</p>
-        </div>
-        <div>
-          <p class="font-bold underline mb-12">تأشيرة السيد مفتش المادة</p>
-        </div>
+        <div><p class="font-bold underline mb-12">تأشيرة السيد(ة) مدير(ة) المؤسسة</p></div>
+        <div><p class="font-bold underline mb-12">تأشيرة السيد مفتش المادة</p></div>
       </div>
     </div>
   </div>
 
-  <!-- JavaScript المنطقية للتطبيق -->
+  <!-- JavaScript المنطقية -->
   <script>
-    // تهيئة المتغيرات والإعدادات
     let records = JSON.parse(localStorage.getItem('dailyLogRecords') || '[]');
     let scriptUrl = localStorage.getItem('scriptUrl') || '';
+    let groups = JSON.parse(localStorage.getItem('educationalGroups') || '["2 متوسط 1", "2 متوسط 2", "4 متوسط 1", "4 متوسط 2"]');
     let recognition = null;
     let isRecording = false;
 
-    // تهيئة التطبيق عند الفتح
     window.onload = function() {
       lucide.createIcons();
       document.getElementById('sessionDate').valueAsDate = new Date();
       if(scriptUrl) document.getElementById('scriptUrl').value = scriptUrl;
+      updateGroupsUI();
       updateBadge();
       initSpeechRecognition();
     };
 
-    // إعداد الميكروفون والتحويل الصوتي
+    function updateGroupsUI() {
+      const select = document.getElementById('sessionGroup');
+      const modalFilter = document.getElementById('modalGroupFilter');
+      const tagsList = document.getElementById('groupsTagsList');
+
+      select.innerHTML = '';
+      modalFilter.innerHTML = '<option value="ALL">جميع الأفواج التربوية</option>';
+      tagsList.innerHTML = '';
+
+      groups.forEach(g => {
+        // قائمة الإدخال الرئيسية
+        const opt1 = document.createElement('option');
+        opt1.value = g; opt1.textContent = g;
+        select.appendChild(opt1);
+
+        // قائمة الفلترة
+        const opt2 = document.createElement('option');
+        opt2.value = g; opt2.textContent = g;
+        modalFilter.appendChild(opt2);
+
+        // وسوم الإدارة
+        const tag = document.createElement('div');
+        tag.className = "bg-slate-200 text-slate-800 px-2 py-0.5 rounded-lg text-[11px] font-bold flex items-center gap-1";
+        tag.innerHTML = `<span>${g}</span> <button onclick="removeGroup('${g}')" class="text-red-500 hover:text-red-700 font-bold">&times;</button>`;
+        tagsList.appendChild(tag);
+      });
+
+      localStorage.setItem('educationalGroups', JSON.stringify(groups));
+    }
+
+    function addGroup() {
+      const input = document.getElementById('newGroupInput');
+      const val = input.value.trim();
+      if(val && !groups.includes(val)) {
+        groups.push(val);
+        input.value = '';
+        updateGroupsUI();
+      }
+    }
+
+    function removeGroup(g) {
+      if(groups.length <= 1) {
+        alert("يجب أن تبقي على فوج واحد على الأقل.");
+        return;
+      }
+      groups = groups.filter(item => item !== g);
+      updateGroupsUI();
+    }
+
+    // إعداد الميكروفون
     function initSpeechRecognition() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (SpeechRecognition) {
         recognition = new SpeechRecognition();
         recognition.continuous = false;
-        recognition.lang = 'ar-DZ'; // اللهجة/اللغة العربية
+        recognition.lang = 'ar-DZ';
         recognition.interimResults = false;
 
         recognition.onstart = function() {
           isRecording = true;
-          document.getElementById('micBtn').className = "px-2.5 py-1 bg-red-600 text-white rounded-full text-[11px] font-bold flex items-center gap-1 animate-pulse";
+          document.getElementById('micBtn').className = "px-2 py-1 bg-red-600 text-white rounded-full text-[11px] font-bold flex items-center gap-1 animate-pulse";
           document.getElementById('micText').innerText = "جاري الاستماع...";
         };
 
@@ -294,46 +321,30 @@
           textarea.value = textarea.value ? textarea.value + ' ' + transcript : transcript;
         };
 
-        recognition.onerror = function(event) {
-          console.error("خطأ الميكروفون:", event.error);
-          stopVoice();
-        };
-
-        recognition.onend = function() {
-          stopVoice();
-        };
+        recognition.onerror = function() { stopVoice(); };
+        recognition.onend = function() { stopVoice(); };
       }
     }
 
     function toggleVoiceInput() {
       if (!recognition) {
-        alert("المتصفح لا يدعم التدوين الصوتي المباشر. استخدم زر الإدخال السريع أو اكتب مباشرة.");
+        alert("المتصفح لا يدعم التدوين الصوتي المباشر.");
         return;
       }
       if (isRecording) {
         recognition.stop();
       } else {
-        try {
-          recognition.start();
-        } catch(e) {
-          stopVoice();
-        }
+        try { recognition.start(); } catch(e) { stopVoice(); }
       }
     }
 
     function stopVoice() {
       isRecording = false;
-      document.getElementById('micBtn').className = "px-2.5 py-1 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 rounded-full text-[11px] font-bold flex items-center gap-1 transition";
+      document.getElementById('micBtn').className = "px-2 py-1 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 rounded-full text-[11px] font-bold flex items-center gap-1 transition";
       document.getElementById('micText').innerText = "إملاء صوتي";
     }
 
-    // إضافة نص سريع
-    function appendQuickText(text) {
-      const textarea = document.getElementById('plannedWork');
-      textarea.value = textarea.value ? textarea.value + ' ' + text : text;
-    }
-
-    // حفظ السجل المحلي وفي Google Sheets
+    // الحفظ والتخزين
     function saveRecord() {
       const date = document.getElementById('sessionDate').value;
       const timing = document.getElementById('sessionTiming').value;
@@ -342,24 +353,15 @@
       const notes = document.getElementById('sessionNotes').value.trim();
 
       if (!work) {
-        alert("يرجى إدخال العمل المزمع إنجازه أولاً!");
+        alert("يرجى كتابة العمل المزمع إنجازه أولاً!");
         return;
       }
 
-      const newRecord = {
-        id: Date.now(),
-        date,
-        timing,
-        group,
-        work,
-        notes
-      };
-
+      const newRecord = { id: Date.now(), date, timing, group, work, notes };
       records.unshift(newRecord);
       localStorage.setItem('dailyLogRecords', JSON.stringify(records));
       updateBadge();
 
-      // المزامنة مع Google Sheets في حال توفر الرابط
       if (scriptUrl) {
         fetch(scriptUrl, {
           method: 'POST',
@@ -369,31 +371,26 @@
         }).catch(err => console.log("خطأ مزامنة السحاب:", err));
       }
 
-      // إعادة ضبط الحقل وتأكيد الحفظ
       document.getElementById('plannedWork').value = '';
       document.getElementById('sessionNotes').value = '';
       alert("تم حفظ الخطة في الكراس بنجاح ✅");
     }
 
-    // تصفية السجل المباشرة لفوج معين
     function filterRecordsByCurrentGroup() {
       const currentGroup = document.getElementById('sessionGroup').value;
       document.getElementById('modalGroupFilter').value = currentGroup;
       openLogModal();
     }
 
-    // عرض وتصنيف السجلات
     function renderLogs() {
       const filterGroup = document.getElementById('modalGroupFilter').value;
       const listContainer = document.getElementById('logList');
       listContainer.innerHTML = '';
 
-      const filtered = filterGroup === 'ALL' 
-        ? records 
-        : records.filter(r => r.group === filterGroup);
+      const filtered = filterGroup === 'ALL' ? records : records.filter(r => r.group === filterGroup);
 
       if (filtered.length === 0) {
-        listContainer.innerHTML = `<div class="text-center py-8 text-slate-400 text-xs">لا توجد حصص مسجلة لهذه الفئة حتى الآن.</div>`;
+        listContainer.innerHTML = `<div class="text-center py-8 text-slate-400 text-xs">لا توجد حصص مسجلة حتى الآن.</div>`;
         return;
       }
 
@@ -417,7 +414,7 @@
     }
 
     function deleteRecord(id) {
-      if(confirm("هل تريد إزالة هذا السجل؟")) {
+      if(confirm("هل تريد حذف هذا السجل؟")) {
         records = records.filter(r => r.id !== id);
         localStorage.setItem('dailyLogRecords', JSON.stringify(records));
         updateBadge();
@@ -435,40 +432,24 @@
       }
     }
 
-    // فتح وإغلاق النوافذ المنبثقة
-    function openLogModal() {
-      renderLogs();
-      document.getElementById('logModal').classList.remove('hidden');
-    }
-
-    function closeLogModal() {
-      document.getElementById('logModal').classList.add('hidden');
-    }
-
-    function openSettings() {
-      document.getElementById('settingsModal').classList.remove('hidden');
-    }
-
-    function closeSettings() {
-      document.getElementById('settingsModal').classList.add('hidden');
-    }
+    function openLogModal() { renderLogs(); document.getElementById('logModal').classList.remove('hidden'); }
+    function closeLogModal() { document.getElementById('logModal').classList.add('hidden'); }
+    function openSettings() { document.getElementById('settingsModal').classList.remove('hidden'); }
+    function closeSettings() { document.getElementById('settingsModal').classList.add('hidden'); }
 
     function saveSettings() {
       scriptUrl = document.getElementById('scriptUrl').value.trim();
       localStorage.setItem('scriptUrl', scriptUrl);
       closeSettings();
-      alert("تم حفظ رابط قاعدة البيانات ✅");
+      alert("تم حفظ الإعدادات بنجاح ✅");
     }
 
-    // تجهيز وطباعة الوثيقة الرسمية
     function printLogbook() {
       const filterGroup = document.getElementById('modalGroupFilter').value;
-      const filtered = filterGroup === 'ALL' 
-        ? records 
-        : records.filter(r => r.group === filterGroup);
+      const filtered = filterGroup === 'ALL' ? records : records.filter(r => r.group === filterGroup);
 
       if (filtered.length === 0) {
-        alert("لا توجد بيانات مطبوعة لهذا الفوج!");
+        alert("لا توجد بيانات مطبوعة!");
         return;
       }
 
